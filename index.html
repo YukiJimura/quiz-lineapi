@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE API 基礎知識クイズ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #ffffff; /* Tailwind white */
+            padding: 30px;
+            border-radius: 12px; /* Tailwind rounded-xl */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* Tailwind shadow-xl */
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+        .day-title {
+            font-size: 1.5rem; /* Tailwind text-2xl */
+            font-weight: 600; /* Tailwind font-semibold */
+            margin-bottom: 20px;
+            color: #1d4ed8; /* Tailwind blue-700 */
+        }
+         .info-message {
+            font-size: 1rem;
+            color: #4b5563; /* Tailwind gray-600 */
+            margin-bottom: 20px;
+         }
+        .question-area {
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 1.125rem; /* Tailwind text-lg */
+            font-weight: 600; /* Tailwind font-semibold */
+            margin-bottom: 15px;
+            color: #1f2937; /* Tailwind gray-900 */
+            text-align: left;
+        }
+        .reference {
+            font-size: 0.875rem; /* Tailwind text-sm */
+            color: #6b7280; /* Tailwind gray-500 */
+            margin-top: 10px;
+            text-align: right;
+             white-space: pre-wrap; /* 改行を反映 */
+        }
+        .options-area button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 8px; /* Tailwind rounded-lg */
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            font-size: 1rem; /* Tailwind text-base */
+            color: #1f2937; /* Tailwind gray-900 */
+        }
+        .options-area button:hover:not(:disabled) {
+            background-color: #d1d5db; /* Tailwind gray-300 */
+        }
+        .options-area button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+         .text-input-area textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 8px; /* Tailwind rounded-lg */
+            font-size: 1rem;
+            min-height: 100px; /* Adjust height as needed */
+         }
+        .text-input-area button {
+            padding: 12px 20px;
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border: none;
+            border-radius: 8px; /* Tailwind rounded-lg */
+            cursor: pointer;
+            font-size: 1rem; /* Tailwind text-base */
+            transition: background-color 0.2s ease;
+        }
+         .text-input-area button:hover {
+            background-color: #2563eb; /* Tailwind blue-600 */
+         }
+
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px; /* Tailwind rounded-lg */
+            text-align: left;
+            min-height: 80px; /* Ensure space even when empty */
+            white-space: pre-wrap; /* 解説の改行を反映 */
+        }
+        .feedback-area.correct {
+            background-color: #d1fae5; /* Tailwind green-100 */
+            border: 1px solid #34d399; /* Tailwind green-500 */
+            color: #065f46; /* Tailwind green-900 */
+        }
+        .feedback-area.incorrect {
+            background-color: #fee2e2; /* Tailwind red-100 */
+            border: 1px solid #f87171; /* Tailwind red-500 */
+            color: #991b1b; /* Tailwind red-900 */
+        }
+         .day-feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px; /* Tailwind rounded-lg */
+            text-align: center;
+            font-size: 1.125rem; /* Tailwind text-lg */
+            font-weight: 600;
+            color: #1f2937;
+            background-color: #e0f2f7; /* Tailwind cyan-100 */
+            border: 1px solid #0891b2; /* Tailwind cyan-600 */
+             white-space: pre-wrap; /* 改行を反映 */
+        }
+        .next-button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border: none;
+            border-radius: 8px; /* Tailwind rounded-lg */
+            cursor: pointer;
+            font-size: 1rem; /* Tailwind text-base */
+            transition: background-color 0.2s ease;
+        }
+        .next-button:hover {
+            background-color: #2563eb; /* Tailwind blue-600 */
+        }
+         .start-button {
+            padding: 12px 20px;
+            background-color: #10b981; /* Tailwind green-500 */
+            color: white;
+            border: none;
+            border-radius: 8px; /* Tailwind rounded-lg */
+            cursor: pointer;
+            font-size: 1.25rem; /* Tailwind text-xl */
+            transition: background-color 0.2s ease;
+        }
+        .start-button:hover {
+            background-color: #059669; /* Tailwind green-600 */
+        }
+        .hidden {
+            display: none;
+        }
+         /* Ensure responsiveness for smaller screens */
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            .day-title {
+                 font-size: 1.25rem;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+            .options-area button, .text-input-area textarea, .text-input-area button {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            .next-button, .start-button {
+                 padding: 10px 15px;
+                 font-size: 1rem;
+            }
+             .day-feedback {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="start-screen">
+            <h2 class="text-2xl font-bold mb-4">LINE API 基礎知識クイズ</h2>
+            <p class="mb-6">APIに関する基礎知識の理解度を測るインタラクティブなクイズです。</p>
+            <p class="mb-6">全5日分、各日3問ずつの構成です。</p>
+             <p id="event-period" class="info-message"></p>
+             <p id="today-status" class="info-message"></p>
+            <button id="start-quiz-button" class="start-button">クイズを開始する</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div id="day-title" class="day-title"></div>
+            <div id="question-area" class="question-area">
+                <div id="question-text" class="question-text"></div>
+                <div id="reference" class="reference"></div>
+            </div>
+            <div id="options-area" class="options-area">
+                </div>
+             <div id="text-input-area" class="text-input-area hidden">
+                 <textarea id="text-answer" placeholder="回答を入力してください"></textarea>
+                 <button id="submit-text-answer">回答する</button>
+             </div>
+            <div id="feedback-area" class="feedback-area hidden"></div>
+            <div id="day-feedback-area" class="day-feedback hidden"></div>
+            <button id="next-button" class="next-button hidden">次の問題へ</button>
+        </div>
+    </div>
+
+    <script>
+        // クイズデータ (5日分 x 3問 = 15問)
+        // 各日のテーマと問題を含みます
+        const quizData = [
+            // Day 1: APIの基本的な定義と役割
+            {
+                day: 1,
+                theme: "APIの基本的な定義と役割",
+                questions: [
+                    {
+                        question: "APIとは、Application, Programming, ( A )を略したものです。( A )にあてはまる言葉として正しいものを選択してください。",
+                        options: ["Interface", "Integration", "Information", "Interaction"],
+                        answer: "Interface",
+                        explanation: "APIはApplication Programming Interfaceの略です。インターネット業界において、インターフェースは異なるシステムやサービスをつなぐ役割を果たします。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P27, P45" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "インターネット業界において、「インターフェース」はどのような意味で使用されますか？",
+                        options: ["データの保存場所", "プログラムの実行環境", "異なる2つの何かを「つなげる」場所やルール、規約", "ユーザーインターフェースのデザイン"],
+                        answer: "異なる2つの何かを「つなげる」場所やルール、規約",
+                        explanation: "インターネット業界におけるインターフェースは、異なるシステムやサービス間で情報をやり取りし、連携するための接点や規約を意味します。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P27, P45" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "LINEにおいて、APIを利用することによって可能になることを、OAMのみの場合と比較して具体的に説明してください。",
+                        answer: "OAMだけでは一斉配信や定型応答しかできませんが、APIを使うと、ユーザー一人ひとりに合わせたメッセージを送ったり、ユーザーの行動に応じてリッチメニューを変えたり、外部のシステムと連携して顧客管理をしたりと、より柔軟で高度な対応が可能になります。",
+                        explanation: "APIを利用することで、OAMの基本機能に加えて、個人単位のメッセージ配信、ユーザーごとのリッチメニュー切り替え、外部システムとの連携による高度な顧客対応などが可能になります。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P27, P29, P33" },
+                        type: "text-input"
+                    }
+                ],
+                encouragement: "Day 1クリアおめでとうございます！APIの基本はバッチリですね！この知識を活かして、今日の業務も効率的に進めましょう！✨"
+            },
+            // Day 2: OAMとAPIでできることの比較
+            {
+                day: 2,
+                theme: "OAMとAPIでできることの比較",
+                questions: [
+                     {
+                        question: "メッセージ配信、カスタマーサポート、リッチメニュー設定など、Official Account Manager (OAM) とAPIの両方で実現可能な機能はどれですか？",
+                        options: ["メッセージ配信", "プロフィール設定", "タイムライン設定・投稿", "LINE通知メッセージ配信"],
+                        answer: "メッセージ配信",
+                        explanation: "メッセージ配信はOAMとAPIの両方で基本的な機能として提供されています。プロフィール設定やタイムライン設定・投稿はOAMのみ、LINE通知メッセージ配信はAPIのみの機能です。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P29, P30" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "以下の機能のうち、Official Account Manager (OAM) のみで実現可能であり、APIでは利用できない機能はどれですか？",
+                        options: ["個人単位でのメッセージ配信", "プロフィール設定", "ユーザーごとのリッチメニュー切り替え", "LINE通知メッセージの配信"],
+                        answer: "プロフィール設定",
+                        explanation: "プロフィール設定はOAMでのみ可能な機能です。その他の機能はAPIを利用することで実現できます。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P29, P30" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "OAMのチャットモードと、API利用時のBotモードは併用できますか？その理由も簡単に説明してください。",
+                        answer: "いいえ、併用できません。OAMのチャットモードとAPI利用時のBotモードは、メッセージの処理方法が異なるため、同時に有効にすると予期しない動作を引き起こす可能性があるためです。",
+                        explanation: "OAMのチャットモードとAPI利用時のBotモードは排他利用となり、併用することはできません。これは、それぞれがメッセージの処理フローを制御するためです。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P48, P49, P50" },
+                        type: "text-input"
+                    }
+                ],
+                 encouragement: "Day 2クリアです！OAMとAPIの違いを理解することは、適切なツール選択に繋がります。今日の業務でも、それぞれの特性を意識してみましょう！🚀"
+            },
+             // Day 3: LINEの代表的なAPI種類と概要
+            {
+                day: 3,
+                theme: "LINEの代表的なAPI種類と概要",
+                questions: [
+                    {
+                        question: "ソーシャルログイン機能を提供し、ユーザーがLINEアカウントを使って外部サービスにログインできるようにするAPIの名称は何ですか？",
+                        options: ["Messaging API", "LINEログイン", "LIFF", "LINE Pay Sales Promotion API"],
+                        answer: "LINEログイン",
+                        explanation: "LINEログインは、ユーザーがLINEアカウント情報を使って外部のWebサイトやアプリに安全にログインできる機能を提供します。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P46" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "LINE公式アカウントとユーザー間でのメッセージ送受信や、応答メッセージの設定などを行うためのAPIの名称は何ですか？",
+                        options: ["LINEログイン", "Messaging API", "LIFF", "LINE Pay Sales Promotion API"],
+                        answer: "Messaging API",
+                        explanation: "Messaging APIは、LINE公式アカウントのコア機能であるメッセージングを実現するためのAPIです。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P46" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "Messaging APIの機能のうち、「Reply API」「Push API」「Multicast API」「Broadcast API」のそれぞれの用途を簡単に説明してください。",
+                        answer: "Reply API: ユーザーからのメッセージなど特定のイベントへの応答。\nPush API: 任意のタイミングで特定のユーザーへメッセージ送信。\nMulticast API: 複数の指定したユーザーへ同時にメッセージ送信。\nBroadcast API: 友だちになっている全てのユーザーへ同時にメッセージ送信。",
+                        explanation: "それぞれのAPIはメッセージの送信方法や対象が異なります。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P47" },
+                        type: "text-input"
+                    }
+                ],
+                 encouragement: "Day 3クリアです！様々なAPIの名前と役割を覚えるのは大変ですが、一つずつ理解していきましょう！今日の業務も、新しい知識を吸収するつもりで頑張りましょう！💡"
+            },
+            // Day 4: プロバイダー・チャネル・ユーザーIDの概念と関係性
+            {
+                day: 4,
+                theme: "プロバイダー・チャネル・ユーザーIDの概念と関係性",
+                questions: [
+                    {
+                        question: "LINE APIを利用する上で、サービス提供者を指す言葉は何ですか？",
+                        options: ["チャネル", "ユーザーID", "プロバイダー", "アカウント"],
+                        answer: "プロバイダー",
+                        explanation: "プロバイダーは、LINE上でサービスを提供する事業者を指します。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P2" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "LINEと外部システムをつなぐ通信路であり、プロバイダーを定めて発行されるものは何ですか？",
+                        options: ["チャネル", "ユーザーID", "プロバイダー", "Messaging API"],
+                        answer: "チャネル",
+                        explanation: "チャネルは、LINEプラットフォームと外部システム間の連携を可能にするための通信単位です。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P7" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "LINEユーザーの個別識別子であるユーザーIDは、チャネルを通して外部に提供される際に、どのような特徴がありますか？（異なるチャネルの場合、同一プロバイダーの場合など）",
+                        answer: "ユーザーIDはチャネルごとに異なる値になります。ただし、同一のプロバイダーが発行した複数のチャネルであれば、同じLINEユーザーに対しては同じユーザーIDが発行されます。",
+                        explanation: "ユーザーIDはチャネルに紐づいて発行されるため、異なるチャネルでは異なる値になりますが、同じプロバイダー内では共通の値になります。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P7" },
+                        type: "text-input"
+                    }
+                ],
+                 encouragement: "Day 4クリアです！プロバイダー、チャネル、ユーザーIDの関係性はAPI連携の肝です。しっかり理解して、今日の業務で活かせるか考えてみましょう！💪"
+            },
+             // Day 5: ユーザーIDの利用ルールとAPI利用開始ステップ
+            {
+                day: 5,
+                theme: "ユーザーIDの利用ルールとAPI利用開始ステップ",
+                questions: [
+                    {
+                        question: "複数のサービスで取得したLINEユーザー情報を、ユーザーの同意なく紐づけて利用することは原則として認められていますか？",
+                        options: ["はい、認められています", "いいえ、認められていません", "紐づける情報の種類によります", "APIの種類によります"],
+                        answer: "いいえ、認められていません",
+                        explanation: "LINE User Data Policyにより、複数のサービスで取得したLINEユーザー情報を紐づけて利用することは原則禁止されています（当社が許可した場合を除く）。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P7, P8" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "LINE APIの利用を開始するにあたり、まず最初に行うべき主なステップは何ですか？",
+                        options: ["LINE公式アカウントを開設する", "API利用規約に同意する", "開発方法を決定する", "初期設定を行う"],
+                        answer: "開発方法を決定する",
+                        explanation: "APIを利用した開発を始める前に、自社開発か外部委託かなど、開発方法を決定することが最初のステップです。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P34" },
+                        type: "multiple-choice"
+                    },
+                    {
+                        question: "API利用開始までの主なステップを、「開発方法の決定」「初期設定（OAM/LINE Developers）」「開発」の3つのキーワードを使って、適切な順序で説明してください。",
+                        answer: "API利用開始までのステップは、まず「開発方法の決定」を行い、次にAPIを利用するための「初期設定（OAM/LINE Developers）」を行い、最後に実際のシステム「開発」に進みます。",
+                        explanation: "開発方法の決定、初期設定、開発という流れでAPIの利用を開始します。",
+                        reference: { title: "API勉強会Basic.pptx", page: "P34, P35" },
+                        type: "text-input"
+                    }
+                ],
+                 encouragement: "Day 5クリア、そして全日程クリアおめでとうございます！🎉\nAPIの基礎知識、しっかり身につきましたね！\nこの学びを自信に、今日の業務、そしてこれからの開発に積極的にチャレンジしていきましょう！応援しています！😊"
+            }
+        ];
+
+        // イベント期間 (5/12 00:00 から 5/19 23:59:59)
+        const eventStartDate = new Date('2025-05-12T00:00:00+09:00'); // イベント開始日 5月12日 00:00 JST
+        const eventEndDate = new Date('2025-05-19T23:59:59+09:00'); // イベント終了日 5月19日 23:59:59 JST
+
+        let currentDay = 0; // 0から4で5日分
+        let currentQuestionIndex = 0; // 0から2で各日3問
+        let correctAnswersToday = 0; // その日の正解数
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const startButton = document.getElementById('start-quiz-button');
+        const eventPeriodElement = document.getElementById('event-period');
+        const todayStatusElement = document.getElementById('today-status');
+        const dayTitleElement = document.getElementById('day-title');
+        const questionAreaElement = document.getElementById('question-area');
+        const questionTextElement = document.getElementById('question-text');
+        const referenceElement = document.getElementById('reference');
+        const optionsAreaElement = document.getElementById('options-area');
+        const textInputAreaElement = document.getElementById('text-input-area');
+        const textAnswerElement = document.getElementById('text-answer');
+        const submitTextAnswerButton = document.getElementById('submit-text-answer');
+        const feedbackAreaElement = document.getElementById('feedback-area');
+        const dayFeedbackAreaElement = document.getElementById('day-feedback-area');
+        const nextButtonElement = document.getElementById('next-button');
+
+        // イベント期間と今日の状態を表示
+        function displayEventStatus() {
+            const now = new Date();
+            eventPeriodElement.textContent = `開催期間: ${eventStartDate.toLocaleDateString()} - ${eventEndDate.toLocaleDateString()}`;
+
+            if (now < eventStartDate) {
+                todayStatusElement.textContent = "クイズはまだ開始されていません。開始までお待ちください。";
+                startButton.disabled = true;
+            } else if (now > eventEndDate) {
+                todayStatusElement.textContent = "クイズ期間は終了しました。お疲れ様でした！";
+                 startButton.disabled = true;
+            } else {
+                const diffTime = now - eventStartDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                currentDay = diffDays; // 今日が何日目かを計算して設定
+
+                if (currentDay >= quizData.length) {
+                     todayStatusElement.textContent = `本日のクイズ（Day ${quizData.length}）は終了しました。`;
+                     startButton.disabled = true;
+                } else {
+                    todayStatusElement.textContent = `本日は Day ${currentDay + 1} のクイズに挑戦できます！`;
+                    startButton.disabled = false;
+                }
+            }
+        }
+
+
+        // クイズを開始する関数
+        function startQuiz() {
+            const now = new Date();
+            if (now < eventStartDate || now > eventEndDate) {
+                 alert("クイズ開催期間外です。"); // メッセージボックスに変更予定
+                 return;
+            }
+
+            const diffTime = now - eventStartDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= quizData.length) {
+                 alert("本日のクイズは終了しました。"); // メッセージボックスに変更予定
+                 return;
+            }
+
+            currentDay = diffDays; // 今日のクイズの日を設定
+            currentQuestionIndex = 0;
+            correctAnswersToday = 0; // 新しい日なので正解数をリセット
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            displayQuestion(currentDay, currentQuestionIndex);
+            feedbackAreaElement.classList.add('hidden');
+            dayFeedbackAreaElement.classList.add('hidden');
+            nextButtonElement.classList.add('hidden');
+        }
+
+        // 指定された日と問題番号の問題を表示する関数
+        function displayQuestion(dayIndex, questionIndex) {
+            // 今日の日付で回答可能な日かチェック
+            const now = new Date();
+            const diffTime = now - eventStartDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (dayIndex > diffDays) {
+                 // 未来の日のクイズなので表示しない
+                 dayTitleElement.textContent = `Day ${quizData[dayIndex].day}: ${quizData[dayIndex].theme}`;
+                 questionTextElement.textContent = "この日のクイズはまだ開始されていません。";
+                 referenceElement.textContent = "";
+                 optionsAreaElement.innerHTML = '';
+                 textInputAreaElement.classList.add('hidden');
+                 feedbackAreaElement.classList.add('hidden');
+                 dayFeedbackAreaElement.classList.add('hidden');
+                 nextButtonElement.classList.add('hidden');
+                 questionAreaElement.classList.remove('hidden'); // 問題エリアは表示しておく
+                 return;
+            }
+
+
+            if (dayIndex < quizData.length) {
+                const dayData = quizData[dayIndex];
+                dayTitleElement.textContent = `Day ${dayData.day}: ${dayData.theme}`;
+
+                if (questionIndex < dayData.questions.length) {
+                    const question = dayData.questions[questionIndex];
+                    questionTextElement.textContent = `Q${questionIndex + 1}. ${question.question}`;
+                     // 参考資料の表示形式を変更
+                    referenceElement.textContent = `出典：${question.reference.title}\nページ：${question.reference.page}`;
+
+                    optionsAreaElement.innerHTML = ''; // 選択肢エリアをクリア
+                    textInputAreaElement.classList.add('hidden'); // テキスト入力エリアを非表示
+                    dayFeedbackAreaElement.classList.add('hidden'); // 日のフィードバックを非表示に
+                    questionAreaElement.classList.remove('hidden'); // 問題エリアを表示
+
+                    if (question.type === 'multiple-choice') {
+                        optionsAreaElement.classList.remove('hidden');
+                        textInputAreaElement.classList.add('hidden');
+                         // 選択肢ボタンを作成して追加
+                        question.options.forEach(option => {
+                            const button = document.createElement('button');
+                            button.textContent = option;
+                            button.addEventListener('click', () => handleAnswer(option, question.answer, question.explanation, question.type));
+                            optionsAreaElement.appendChild(button);
+                        });
+                    } else if (question.type === 'text-input') {
+                        optionsAreaElement.classList.add('hidden');
+                        textInputAreaElement.classList.remove('hidden');
+                        textAnswerElement.value = ''; // 入力欄をクリア
+                         // 回答ボタンのイベントリスナーは共通で使う
+                    }
+
+
+                    feedbackAreaElement.classList.add('hidden'); // 個別フィードバックエリアを非表示
+                    nextButtonElement.classList.add('hidden'); // 次へボタンを非表示
+                    // Remove correct/incorrect classes from feedback area
+                    feedbackAreaElement.classList.remove('correct', 'incorrect');
+                    feedbackAreaElement.textContent = ''; // Clear previous feedback
+
+                } else {
+                    // その日の問題が全て終了
+                    questionAreaElement.classList.add('hidden'); // 問題エリアを非表示
+                    displayDayFeedback();
+                }
+            } else {
+                // 全ての日が終了
+                questionAreaElement.classList.add('hidden'); // 問題エリアを非表示
+                endQuiz();
+            }
+        }
+
+        // 回答を処理する関数
+        function handleAnswer(selectedOption, correctAnswer, explanation, type) {
+            // 既に回答済みの場合は何もしない
+            if (!feedbackAreaElement.classList.contains('hidden')) {
+                return;
+            }
+
+            // 全ての選択肢ボタンまたはテキスト入力エリアを無効化
+            if (type === 'multiple-choice') {
+                 Array.from(optionsAreaElement.children).forEach(button => {
+                     button.disabled = true;
+                 });
+            } else if (type === 'text-input') {
+                 textAnswerElement.disabled = true;
+                 submitTextAnswerButton.disabled = true;
+            }
+
+
+            feedbackAreaElement.classList.remove('hidden'); // フィードバックエリアを表示
+
+            let isCorrect = false;
+            if (type === 'multiple-choice') {
+                 if (Array.isArray(correctAnswer)) {
+                      isCorrect = correctAnswer.includes(selectedOption);
+                 } else {
+                      isCorrect = (selectedOption === correctAnswer);
+                 }
+            } else if (type === 'text-input') {
+                 // 記述式の場合は入力されたテキストと正解を比較
+                 const inputText = textAnswerElement.value.trim();
+                 // 簡単な比較（大文字小文字、全角半角、スペースなどを厳密に区別しない場合は、ここで正規化処理を追加）
+                 isCorrect = (inputText === correctAnswer.trim());
+            }
+
+
+            if (isCorrect) {
+                // 正解の場合
+                feedbackAreaElement.classList.remove('incorrect');
+                feedbackAreaElement.classList.add('correct');
+                feedbackAreaElement.textContent = `正解！\n${explanation}`;
+                correctAnswersToday++; // 正解数をカウント
+            } else {
+                // 不正解の場合
+                feedbackAreaElement.classList.remove('correct');
+                feedbackAreaElement.classList.add('incorrect');
+                // 記述式の場合は正解も表示
+                const answerText = (type === 'text-input') ? `\n正解は「${correctAnswer}」です。` : `\n正解は「${Array.isArray(correctAnswer) ? correctAnswer.join(' または ') : correctAnswer}」です。`;
+                feedbackAreaElement.textContent = `不正解...${answerText}\n${explanation}`;
+            }
+
+            nextButtonElement.classList.remove('hidden'); // 次へボタンを表示
+            // 最後の問題の場合はボタンのテキストを変更
+            if (currentQuestionIndex === quizData[currentDay].questions.length - 1) {
+                 if (currentDay === quizData.length - 1) {
+                     nextButtonElement.textContent = "クイズを終了する";
+                 } else {
+                    nextButtonElement.textContent = "次の日へ";
+                 }
+            } else {
+                 nextButtonElement.textContent = "次の問題へ";
+            }
+        }
+
+        // 記述式問題の回答ボタンのイベントリスナー
+        submitTextAnswerButton.addEventListener('click', () => {
+             const question = quizData[currentDay].questions[currentQuestionIndex];
+             if (question.type === 'text-input') {
+                 handleAnswer(textAnswerElement.value, question.answer, question.explanation, question.type);
+             }
+        });
+
+
+        // その日の解答率に応じたフィードバックを表示する関数
+        function displayDayFeedback() {
+            questionTextElement.textContent = ""; // 問題文をクリア
+            referenceElement.textContent = ""; // 参照をクリア
+            optionsAreaElement.innerHTML = ''; // 選択肢エリアをクリア
+            textInputAreaElement.classList.add('hidden'); // テキスト入力エリアを非表示
+            feedbackAreaElement.classList.add('hidden'); // 個別フィードバックを非表示
+
+            dayFeedbackAreaElement.classList.remove('hidden'); // 日のフィードバックを表示
+
+            const totalQuestionsToday = quizData[currentDay].questions.length;
+            const percentage = (correctAnswersToday / totalQuestionsToday) * 100;
+
+            let comment = `Day ${quizData[currentDay].day} 終了！\n本日の正解数: ${correctAnswersToday} / ${totalQuestionsToday} (${percentage.toFixed(0)}%)`;
+
+             // 解答率に応じたコメント
+            if (percentage === 100) {
+                comment += "\n素晴らしい！全問正解です！";
+            } else if (percentage >= 67) { // 2/3
+                comment += "\nあと一歩！もう少しで全問正解でしたね。";
+            } else if (percentage >= 34) { // 1/3
+                 comment += "\n半分近く正解です！";
+            }
+            else { // 0/3
+                comment += "\n今回は難しかったかもしれませんね。";
+            }
+
+            // 日ごとの応援コメントを追加
+            comment += "\n\n" + quizData[currentDay].encouragement;
+
+
+            dayFeedbackAreaElement.textContent = comment;
+
+            nextButtonElement.classList.remove('hidden'); // 次へボタンを表示
+             if (currentDay === quizData.length - 1) {
+                 nextButtonElement.textContent = "クイズを終了する";
+             } else {
+                nextButtonElement.textContent = "次の日へ";
+             }
+        }
+
+        // 次の問題または次の日へ進むボタンのイベントリスナー
+        nextButtonElement.addEventListener('click', () => {
+            if (currentQuestionIndex < quizData[currentDay].questions.length - 1) {
+                // 次の問題へ
+                currentQuestionIndex++;
+                displayQuestion(currentDay, currentQuestionIndex);
+            } else {
+                // 次の日へ、またはクイズ終了
+                const now = new Date();
+                const diffTime = now - eventStartDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                if (currentDay < quizData.length - 1 && currentDay < diffDays) {
+                     // 次の日のクイズが今日以降であれば進める
+                     currentDay++;
+                     currentQuestionIndex = 0; // 問題番号をリセット
+                     correctAnswersToday = 0; // 正解数をリセット
+                     displayQuestion(currentDay, currentQuestionIndex);
+                } else if (currentDay === quizData.length - 1) {
+                     // 最終日のクイズが終了
+                     endQuiz();
+                } else {
+                     // まだ次の日にならないと進めない
+                     alert(`Day ${currentDay + 2} のクイズは明日以降に挑戦できます。`); // メッセージボックスに変更予定
+                     // 次へボタンを非表示にするか、テキストを変更するなどのUI調整も検討
+                     nextButtonElement.classList.add('hidden');
+                }
+            }
+        });
+
+        // クイズ終了処理
+        function endQuiz() {
+             dayTitleElement.textContent = "LINE API 基礎知識クイズ 完了！";
+             questionTextElement.textContent = "全てのクイズが終了しました。お疲れ様でした！";
+             referenceElement.textContent = "";
+             optionsAreaElement.innerHTML = '';
+             textInputAreaElement.classList.add('hidden');
+             feedbackAreaElement.classList.add('hidden');
+             dayFeedbackAreaElement.classList.add('hidden');
+             nextButtonElement.classList.add('hidden');
+             startButton.classList.remove('hidden'); // 開始ボタンを再度表示
+             displayEventStatus(); // 終了ステータスを表示
+        }
+
+
+        // 開始ボタンのイベントリスナー
+        startButton.addEventListener('click', startQuiz);
+
+        // ページ読み込み完了時にイベント期間と今日の状態を表示
+        window.onload = () => {
+            displayEventStatus();
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+        };
+
+    </script>
+</body>
+</html>
